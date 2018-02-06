@@ -52,7 +52,7 @@ func main() {
 		下载网盘内文件, 支持网盘内目录 (文件夹) 下载, 支持多个文件或目录下载, 支持断点续传和高并发高速下载.
 
 	程序目前处于测试版, 后续会添加更多的实用功能.
-	
+
 	---------------------------------------------------
 	前往 https://github.com/iikira/BaiduPCS-Go/releases 以获取程序更新信息!
 	---------------------------------------------------`
@@ -103,6 +103,24 @@ func main() {
 	}
 
 	app.Commands = []cli.Command{
+		{
+			Name:     "server",
+			Usage:    "启用 api server",
+			Category: "其他",
+			Before:   reloadFn,
+			Action: func(c *cli.Context) error {
+				fmt.Printf("api server功能为实验性功能, 测试中, 请求 http://localhost:%d 查看效果\n", c.Uint("port"))
+				startApiServer(c.Uint("port"))
+				return nil
+			},
+			Flags: []cli.Flag{
+				cli.UintFlag{
+					Name:  "port",
+					Usage: "自定义端口",
+					Value: 8080,
+				},
+			},
+		},
 		{
 			Name:     "web",
 			Usage:    "启用 web 客户端 (测试中)",

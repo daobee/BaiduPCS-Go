@@ -19,9 +19,9 @@ func startApiServer(port uint) error{
   {
     v1.POST("/test", printBody)
     v1.GET("/w/:a/:b", printParams)
-    v1.GET("/login", printBody)
+    v1.GET("/login/:bduss", loginHandler)
     v1.GET("/su", printBody)
-    v1.GET("/logout", printBody)
+    v1.GET("/logout", logoutHandler)
     v1.GET("/loglist", loglistHandler)
     v1.GET("/quota", quotaHandler)
     v1.GET("/cd/*path", cdHandler)
@@ -54,6 +54,43 @@ func printParams(c *gin.Context) {
   c.JSON(200, gin.H{
     "a": a,
     "b": b,
+  })
+}
+
+func loginHandler(c *gin.Context) {
+  bduss := c.Param("bduss")
+  _, err := pcsconfig.Config.SetBDUSS(bduss, "", "")
+  if err != nil {
+    c.JSON(500, gin.H{
+      "error": err,
+    })
+  } else {
+    c.JSON(200, gin.H{
+      "msg": "登录成功",
+    })
+  }
+}
+
+func logoutHandler(c *gin.Context) {
+  // 仅退出当前active账号, 与cmd模式行为不同
+  uid := pcsconfig.ActiveBaiduUser.UID
+  if len(pcsconfig.Config.BaiduUserList) == 0 || uid == 0 {
+    c.JSON(500, gin.H{
+      "error": "未设置任何百度帐号, 不能退出",
+    })
+  }
+  if !pcsconfig.Config.CheckUIDExist(uid) {
+    c.JSON(500, gin.H{
+      "error": "退出用户失败, uid 不存在",
+    })
+  }
+  if !pcsconfig.Config.DeleteBaiduUserByUID(uid) {
+    c.JSON(500, gin.H{
+      "error": "退出用户失败",
+    })
+  }
+  c.JSON(200, gin.H{
+    "msg": "退出用户成功",
   })
 }
 

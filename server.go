@@ -5,7 +5,6 @@ import (
   "net/http"
 
   "github.com/gin-gonic/gin"
-	// "github.com/iikira/BaiduPCS-Go/pcsconfig"
 	"github.com/iikira/BaiduPCS-Go/pcscommand"
 	"github.com/iikira/BaiduPCS-Go/pcsconfig"
 )
@@ -20,7 +19,7 @@ func startApiServer(port uint) error{
     v1.POST("/test", printBody)
     v1.GET("/w/:a/:b", printParams)
     v1.GET("/login/:bduss", loginHandler)
-    v1.GET("/su", printBody)
+    v1.GET("/su/:uid", suHandler)
     v1.GET("/logout", logoutHandler)
     v1.GET("/loglist", loglistHandler)
     v1.GET("/quota", quotaHandler)
@@ -32,8 +31,10 @@ func startApiServer(port uint) error{
     v1.GET("/mkdir", printBody)
     v1.GET("/cp", printBody)
     v1.GET("/mv", printBody)
-    v1.GET("/download", printBody)
+    v1.GET("/download/*path", downloadHandler)
     v1.GET("/upload", printBody)
+    v1.GET("/rapidupload", printBody)
+    v1.GET("/sumfile", printBody)
     v1.GET("/set", printBody)
     v1.GET("/quit", printBody)
   }
@@ -71,9 +72,43 @@ func loginHandler(c *gin.Context) {
   }
 }
 
+func suHandler(c *gin.Context) {
+  // 仅切换到选择的账号, 与cmd模式行为不同
+  uid, err := strconv.ParseUint(c.Param("uid"), 10, 64)
+  if err != nil {
+    c.JSON(500, gin.H{
+      "error": err,
+    })
+  }
+  if len(pcsconfig.Config.BaiduUserList) == 0 {
+    c.JSON(500, gin.H{
+      "error": "未设置任何百度帐号, 不能切换",
+    })
+  }
+  if !pcsconfig.Config.CheckUIDExist(uid) {
+    c.JSON(500, gin.H{
+      "error": "切换用户失败, uid 不存在",
+    })
+  }
+  pcsconfig.Config.BaiduActiveUID = uid
+  if err = pcsconfig.Config.Save(); err != nil {
+    c.JSON(500, gin.H{
+      "error": err,
+    })
+  }
+  c.JSON(200, gin.H{
+    "msg": "切换用户成功",
+  })
+}
+
 func logoutHandler(c *gin.Context) {
   // 仅退出当前active账号, 与cmd模式行为不同
-  uid := pcsconfig.ActiveBaiduUser.UID
+  uid, err := strconv.ParseUint(c.Param("uid"), 10, 64)
+  if err != nil {
+    c.JSON(500, gin.H{
+      "error": err,
+    })
+  }
   if len(pcsconfig.Config.BaiduUserList) == 0 || uid == 0 {
     c.JSON(500, gin.H{
       "error": "未设置任何百度帐号, 不能退出",
@@ -165,4 +200,9 @@ func metaHandler(c *gin.Context) {
       "meta": meta,
     })
   }
+}
+
+func downloadHandler(c *gin.Context) {
+  path := c.Param("path")
+  // pcscommand.RunDownload(getSubArgs(c)...)
 }

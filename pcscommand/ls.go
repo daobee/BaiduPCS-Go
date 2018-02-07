@@ -77,3 +77,33 @@ func RunLs(path string) {
 		panic(err)
 	}
 }
+
+type Summary struct {
+	TotalSize   int64	`json:"totalSize"`
+	TotalSizeStr   string	`json:"totalSizeStr"`
+	FileCount   int64	`json:"fileCount"`
+	DirCount    int64	`json:"dirCount"`
+}
+
+// Ls 执行列目录
+func Ls(path string) (interface{}, interface{}, error){
+	path, err := getAbsPath(path)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	files, err := info.FilesDirectoriesList(path, false)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	fN, dN := files.Count()
+	summary := new(Summary)
+	summary.TotalSize = files.TotalSize()
+	summary.TotalSizeStr = pcsutil.ConvertFileSize(files.TotalSize())
+	summary.FileCount = fN
+	summary.DirCount = dN
+	// summary := new(Summary)
+
+	return files, summary, nil
+}

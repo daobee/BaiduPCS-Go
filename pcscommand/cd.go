@@ -33,3 +33,25 @@ func RunChangeDirectory(path string, isList bool) {
 		RunLs(".")
 	}
 }
+
+// ChangeDirectory 执行更改工作目录
+func ChangeDirectory(path string) (err error){
+	path, err = getAbsPath(path)
+	if err != nil {
+		return err
+	}
+
+	data, err := info.FilesDirectoriesMeta(path)
+	if err != nil {
+		return err
+	}
+
+	if !data.Isdir {
+		return fmt.Errorf("错误: %s 不是一个目录 (文件夹)\n", path)
+	}
+
+	pcsconfig.ActiveBaiduUser.Workdir = path
+	pcsconfig.Config.Save()
+
+	return nil
+}

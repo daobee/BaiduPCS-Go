@@ -20,3 +20,14 @@ func RunGetMeta(path string) {
 	fmt.Println()
 	fmt.Println(data)
 }
+
+// GetMeta 执行 返回单个文件/目录的元信息
+func GetMeta(path string) (interface{}, error){
+	p, err := getAbsPath(path)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	return info.FilesDirectoriesMeta(p)
+}

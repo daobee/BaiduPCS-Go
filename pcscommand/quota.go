@@ -20,3 +20,8 @@ func RunGetQuota() {
 		100*float64(used)/float64(quota),
 	)
 }
+
+// GetQuota 获取当前用户空间配额信息
+func GetQuota() (quota, used int64, err error){
+	return info.QuotaInfo()
+}

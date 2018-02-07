@@ -36,6 +36,11 @@ func (c *PCSConfig) GetAllBaiduUser() string {
 	return s.String()
 }
 
+// GetAllBaiduUserInJSON JSON输出所有已登录百度帐号
+func (c *PCSConfig) GetAllBaiduUserInJSON() interface{} {
+	return c.BaiduUserList
+}
+
 // CheckUIDExist 检查 百度uid 是否存在于已登录列表
 func (c *PCSConfig) CheckUIDExist(uid uint64) bool {
 	if uid == 0 {

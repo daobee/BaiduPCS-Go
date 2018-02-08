@@ -12,7 +12,6 @@ import (
 func startApiServer(port uint) error{
 	fmt.Printf("api server starting...\n")
   // gin.SetMode(gin.ReleaseMode)
-  // define api handlers mostly like app.Commands in main.go
   r := gin.Default()
   v1 := r.Group("/api/v1")
   {
